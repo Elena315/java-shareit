@@ -35,8 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
         item.setOwner(user);
 
-        itemRepository.create(item);
-        return ItemMapper.toItemDto(item);
+        return ItemMapper.toItemDto(itemRepository.create(item));
     }
 
     @Override
@@ -85,6 +84,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> search(String text) {
-        return itemRepository.search(text).stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
+        return itemRepository.search(text).stream()
+                .map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
+
 }

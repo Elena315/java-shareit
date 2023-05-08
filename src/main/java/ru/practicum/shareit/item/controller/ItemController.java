@@ -19,7 +19,7 @@ public class ItemController {
     @PostMapping()
     public ItemDto create(@RequestHeader("X-Sharer-User-Id") long userId,
                           @Valid @RequestBody ItemDto itemDto) {
-        log.info("Создана вещь с id = {} у пользователя с id = {}", itemDto.getId(), userId);
+        log.info("POST/items - Создана вещь {} у пользователя с id = {}", itemDto.getName(), userId);
         return itemService.create(userId, itemDto);
     }
 
@@ -27,24 +27,28 @@ public class ItemController {
     public ItemDto update(@RequestHeader("X-Sharer-User-Id") long userId,
                           @PathVariable long itemId,
                           @RequestBody ItemDto itemDto) {
-        log.info("Обновлена вещь с id = {}", itemId);
+        log.info("PATCH/items/id - Обновлена вещь с id = {}", itemId);
         return itemService.update(userId, itemId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItem(@PathVariable long itemId) {
-        log.info("Получена вещь с id = {}", itemId);
+    public ItemDto getItem(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @PathVariable long itemId) {
+        log.info("GET/items/id - Получена вещь с id = {}", itemId);
         return itemService.getItem(itemId);
     }
 
     @GetMapping()
-    public List<ItemDto> getAllItemsByUser(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getAllItemsByUser(
+            @RequestHeader("X-Sharer-User-Id") long userId) {
         log.info("Получение всех вещей пользователя с id = {}", userId);
         return itemService.getAllItemsByUser(userId);
     }
 
     @GetMapping("search")
-    public List<ItemDto> search(@RequestParam(required = false) String text) {
+    public List<ItemDto> search(
+            @RequestParam(required = false) String text) {
         return itemService.search(text);
     }
 }

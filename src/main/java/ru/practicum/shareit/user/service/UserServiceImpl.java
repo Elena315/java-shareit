@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -15,42 +15,44 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
     @Override
     public UserDto create(UserDto userDto) {
         validateEmail(userDto);
-        User user = userRepository.create(UserMapper.toUser(userDto));
-        return UserMapper.toUserDto(user);
+        User user = UserMapper.toUser(userDto);
+        return UserMapper.toUserDto(userRepository.create(user));
     }
 
-    @Override
-    public UserDto update(Long userId, UserDto userDto) {
+     @Override
+     public UserDto update(Long userId, UserDto userDto) {
+         User user = userRepository.getUser(userId).orElseThrow(() ->
+                 new NotFoundException("Неверный идентификатор пользователя"));
 
-        User user = userRepository.getUser(userId).orElseThrow(() ->
-                new NotFoundException("Неверный идентификатор пользователя"));
+                 if (userDto.getName() != null) {
+                     user.setName(userDto.getName());
+                 } else user.setName(user.getName());
 
-                if (userDto.getName() != null) {
-                    user.setName(userDto.getName());
-                }
-                if (userDto.getEmail() != null) {
-                    validateEmail(userDto);
-                    user.setEmail(userDto.getEmail());
-                }
-                userRepository.update(user);
-                return UserMapper.toUserDto(user);
-    }
+                 if (userDto.getEmail() != null) {
+                     if (userRepository.getAll().stream()
+                             .filter(user1 -> !user1.getId().equals(userDto.getId()))
+                             .anyMatch(user1 -> userDto.getEmail().equals(user1.getEmail()))) {
+                         throw new ValidationException("Такой email уже используется");
+                     }
+                     user.setEmail(userDto.getEmail());
+                 }
+                 userRepository.update(user);
+                 return UserMapper.toUserDto(user);
+     }
 
     @Override
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userRepository.getAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -67,7 +69,9 @@ public class UserServiceImpl implements UserService {
     }
 
     public void validateEmail(UserDto userDto) {
-        if (userRepository.getAll().stream().anyMatch(user1 -> user1.getEmail().equals(userDto.getEmail()))) {
+        if (userRepository.getAll().stream()
+                .filter(user -> !user.getId().equals(userDto.getId()))
+                .anyMatch(user -> userDto.getEmail().equals(user.getEmail()))) {
             throw new ValidationException("Такой email уже используется");
         }
     }
