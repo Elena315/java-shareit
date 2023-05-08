@@ -98,7 +98,7 @@ public class ItemControllerTest extends ShareItTests {
 
         String validatorMessage = validator.validate(itemDto).iterator().next().getMessage();
 
-        assertEquals("Описание вещи не может быть пустым", validatorMessage,
+        assertEquals("Имя вещи не может быть пустым", validatorMessage,
                 "Текст ошибки валидации разный");
 
         assertEquals(itemController.getItem(1L), itemDto, "Вещь не создалась");
