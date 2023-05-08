@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -9,6 +10,7 @@ import java.util.*;
 @Slf4j
 @Component
 public class UserRepositoryImpl implements UserRepository {
+
     private final Map<Long, User> users = new HashMap<>();
     private Long userId = 0L;
 
@@ -24,9 +26,13 @@ public class UserRepositoryImpl implements UserRepository {
     //Обновление пользователя
     @Override
     public User update(User user) {
-        users.put(user.getId(), user);
-        log.info("Обновлен пользователь с id = {}", user.getId());
-        return user;
+        if (users.containsKey(userId)) {
+            users.put(user.getId(), user);
+            log.info("Обновлен пользователь с id = {}", user.getId());
+            return user;
+        }else {
+            throw new NotFoundException("Неверный идентификатор пользователя");
+        }
     }
 
     //Удаление пользователя
@@ -48,5 +54,10 @@ public class UserRepositoryImpl implements UserRepository {
     public List<User> getAll() {
         log.info("Запрос списка пользователей");
         return new ArrayList<>(users.values());
+    }
+    @Override
+    public Map<Long, User> getAllUsers() {
+        log.info("Запрос списка пользователей c ID");
+        return users;
     }
 }
