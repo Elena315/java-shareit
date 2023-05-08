@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.dto.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,15 +57,17 @@ public class UserServiceImpl implements UserService {
             checkUniqueEmail(userNew);
             userOld.setEmail(userNew.getEmail());
         }
-
         return userOld;
     }
 
     @Override
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList());
+        List<UserDto> list = new ArrayList<>();
+        for (User user : userRepository.getAll()) {
+            UserDto userDto = UserMapper.toUserDto(user);
+            list.add(userDto);
+        }
+        return list;
     }
 
     @Override
@@ -79,11 +82,4 @@ public class UserServiceImpl implements UserService {
                 new NotFoundException("Неверный идентификатор пользователя"));
         return UserMapper.toUserDto(user);
     }
-
-   /* public void validateEmail(UserDto userDto) {
-        if (userRepository.getAll().stream()
-                .anyMatch(user -> userDto.getEmail().equals(user.getEmail()))) {
-            throw new ValidationException("Такой email уже используется");
-        }
-    }*/
 }
