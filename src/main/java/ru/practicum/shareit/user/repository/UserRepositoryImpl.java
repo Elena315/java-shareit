@@ -30,7 +30,7 @@ public class UserRepositoryImpl implements UserRepository {
             users.put(user.getId(), user);
             log.info("Обновлен пользователь с id = {}", user.getId());
             return user;
-        }else {
+        } else {
             throw new NotFoundException("Неверный идентификатор пользователя");
         }
     }
@@ -55,6 +55,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.info("Запрос списка пользователей");
         return new ArrayList<>(users.values());
     }
+
     @Override
     public Map<Long, User> getAllUsers() {
         log.info("Запрос списка пользователей c ID");
