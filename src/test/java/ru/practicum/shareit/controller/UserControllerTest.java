@@ -75,7 +75,7 @@ public class UserControllerTest extends ShareItTests {
 
         Throwable throwable = assertThrows(ValidationException.class, () -> userController.create(userDto1));
 
-        assertEquals("Такой email уже используется", throwable.getMessage(),
+        assertEquals("Пользователь с email = 'test@yandex.ru' уже существует", throwable.getMessage(),
                 "Текст ошибки валидации разный");
     }
 
@@ -132,7 +132,7 @@ public class UserControllerTest extends ShareItTests {
 
         Throwable throwable = assertThrows(ValidationException.class, () -> userController.create(userDto1));
 
-        assertEquals("Такой email уже используется", throwable.getMessage(),
+        assertEquals("Пользователь с email = 'test@yandex.ru' уже существует", throwable.getMessage(),
                 "Текст ошибки валидации разный");
     }
 
