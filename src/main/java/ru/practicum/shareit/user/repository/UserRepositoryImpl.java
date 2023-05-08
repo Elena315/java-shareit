@@ -2,21 +2,21 @@ package ru.practicum.shareit.user.repository;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
 @Slf4j
 @Component
 public class UserRepositoryImpl implements UserRepository {
-    private final Map<Long, User> userList = new HashMap<>();
+    private final Map<Long, User> users = new HashMap<>();
     private Long userId = 0L;
 
     //Создание пользователя
     @Override
     public User create(User user) {
         user.setId(++userId);
-        userList.put(user.getId(), user);
+        users.put(user.getId(), user);
         log.info("Создан пользователь с id = {}", user.getId());
         return user;
     }
@@ -24,7 +24,7 @@ public class UserRepositoryImpl implements UserRepository {
     //Обновление пользователя
     @Override
     public User update(User user) {
-        userList.put(user.getId(), user);
+        users.put(user.getId(), user);
         log.info("Обновлен пользователь с id = {}", user.getId());
         return user;
     }
@@ -32,7 +32,7 @@ public class UserRepositoryImpl implements UserRepository {
     //Удаление пользователя
     @Override
     public void delete(Long userId) {
-        userList.remove(userId);
+        users.remove(userId);
         log.info("Пользователь с id = {} удален", userId);
     }
 
@@ -40,13 +40,13 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Optional<User> getUser(Long userId) {
         log.info("Поиск пользователя с id = {}", userId);
-        return Optional.ofNullable(userList.get(userId));
+        return Optional.ofNullable(users.get(userId));
     }
 
     //Получение всех пользователей
     @Override
     public List<User> getAll() {
         log.info("Запрос списка пользователей");
-        return new ArrayList<>(userList.values());
+        return new ArrayList<>(users.values());
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.ShareItTests;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.UserController;
+import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
