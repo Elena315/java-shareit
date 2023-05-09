@@ -41,23 +41,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto update(Long userId, UserDto userDto) {
-        userDto.setId(userId);
-        User userOld = userRepository.getUser(userId).orElseThrow(() ->
+        User user = userRepository.getUser(userId).orElseThrow(() ->
                 new NotFoundException("Неверный идентификатор пользователя"));
-        User userNew = UserMapper.toUser(userDto);
-        userNew = updateUserData(userNew, userOld);
-        return UserMapper.toUserDto(userRepository.update(userNew));
-    }
 
-    private User updateUserData(User userNew, User userOld) {
-        if (userNew.getName() != null) {
-            userOld.setName(userNew.getName());
+
+        String name = userDto.getName();
+        String email = userDto.getEmail();
+        user.setName(name != null && !name.isBlank() ? name : user.getName());
+
+
+        if (email != null && !email.isBlank()) {
+            boolean emailExist = userRepository.getAll().stream()
+                    .filter(usery -> !usery.getId().equals(userId))
+                    .anyMatch(usery -> email.equals(usery.getEmail()));
+            if (emailExist) {
+                throw new IllegalArgumentException(String.format("Error with email: %s, it already exist!", email));
+            }
+            user.setEmail(email);
         }
-        if (userNew.getEmail() != null) {
-            checkUniqueEmail(userNew);
-            userOld.setEmail(userNew.getEmail());
-        }
-        return userOld;
+        userRepository.update(user);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
