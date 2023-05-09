@@ -26,13 +26,12 @@ public class UserRepositoryImpl implements UserRepository {
     //Обновление пользователя
     @Override
     public User update(User user) {
-        if (users.containsKey(userId)) {
-            users.put(user.getId(), user);
-            log.info("Обновлен пользователь с id = {}", user.getId());
-            return user;
-        } else {
+        if (!users.containsKey(userId)) {
             throw new NotFoundException("Неверный идентификатор пользователя");
         }
+        users.put(user.getId(), user);
+        log.info("Обновлен пользователь с id = {}", user.getId());
+        return user;
     }
 
     //Удаление пользователя
