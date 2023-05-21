@@ -4,17 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.ShareItTests;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -73,10 +72,9 @@ public class UserControllerTest extends ShareItTests {
         userDto1.setName("Тестовое наименование1");
         userDto1.setEmail("test@yandex.ru");
 
-        Throwable throwable = assertThrows(ValidationException.class, () -> userController.create(userDto1));
+        Throwable throwable = assertThrows(DataIntegrityViolationException.class, () -> userController.create(userDto1));
 
-        assertEquals("Пользователь с email = 'test@yandex.ru' уже существует", throwable.getMessage(),
-                "Текст ошибки валидации разный");
+        assertNotNull(throwable.getMessage());
     }
 
     //Обновление несуществующего пользователя
@@ -116,8 +114,8 @@ public class UserControllerTest extends ShareItTests {
         assertEquals(userController.getUser(1L), userDto1, "Пользователь не обновился");
     }
 
-    //Создание пользователя с повторяющимся email
-    @Test
+    //Обновление пользователя с повторяющимся email
+    @Test()
     public void updateUserWithRepeatEmail() {
         UserDto userDto = new UserDto();
         userDto.setId(1L);
@@ -130,10 +128,9 @@ public class UserControllerTest extends ShareItTests {
         userDto1.setName("Тестовое наименование1");
         userDto1.setEmail("test@yandex.ru");
 
-        Throwable throwable = assertThrows(ValidationException.class, () -> userController.create(userDto1));
+        Throwable throwable = assertThrows(DataIntegrityViolationException.class, () -> userController.create(userDto1));
 
-        assertEquals("Пользователь с email = 'test@yandex.ru' уже существует", throwable.getMessage(),
-                "Текст ошибки валидации разный");
+        assertNotNull(throwable.getMessage());
     }
 
     //Удаление существующего пользователя
