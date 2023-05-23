@@ -8,7 +8,9 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.exception.AvailableException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -70,7 +72,9 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAll(long userId, String state) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Неверный идентификатор пользователя"));
 
-        List<BookingDto> result = bookingRepository.findByBookerIdOrderByStartDesc(userId).stream()
+        List<BookingDto> result = bookingRepository
+                .findByBookerIdOrderByStartDesc(userId)
+                .stream()
                 .map(BookingMapper::toBookingDto).collect(Collectors.toList());
 
         switch (Status.valueOf(state)) {
@@ -99,7 +103,9 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllBookingByOwner(long userId, String state) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Неверный идентификатор пользователя"));
 
-        List<BookingDto> result = bookingRepository.searchBookingByItemOwnerId(userId).stream()
+        List<BookingDto> result = bookingRepository
+                .searchBookingByItemOwnerId(userId)
+                .stream()
                 .map(BookingMapper::toBookingDto).collect(Collectors.toList());
 
         if (result.isEmpty()) {
