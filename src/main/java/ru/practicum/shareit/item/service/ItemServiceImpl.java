@@ -23,7 +23,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -124,10 +123,10 @@ public class ItemServiceImpl implements ItemService {
                     BookingDtoForItem lastBooking = null;
                     BookingDtoForItem nextBooking = null;
 
-                    for(Booking booking : bookings){
-                        if (booking.getEnd().isBefore(now)){
+                    for (Booking booking : bookings) {
+                        if (booking.getEnd().isBefore(now)) {
                             lastBooking = BookingMapper.toBookingDtoForItem(booking);
-                        } else if (booking.getStart().isAfter(now)){
+                        } else if (booking.getStart().isAfter(now)) {
                             nextBooking = BookingMapper.toBookingDtoForItem(booking);
                             break;
                         }
