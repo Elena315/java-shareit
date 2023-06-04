@@ -12,10 +12,10 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoBooking;
 import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
@@ -24,8 +24,10 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -90,27 +92,13 @@ public class ItemServiceImpl implements ItemService {
         ItemDtoBooking itemDtoBooking = ItemMapper.toItemDtoWithBooking(item);
 
         if (item.getOwner().getId().equals(userId)) {
-            LocalDateTime now = LocalDateTime.now();
-            BookingDtoForItem lastBooking = bookingRepository
-                    .findTopByItemOwnerIdAndStatusAndStartBeforeOrderByEndDesc(userId, Status.APPROVED, now)
-                    .map(BookingMapper::toBookingDtoForItem)
-                    .orElse(null);
-
-            BookingDtoForItem nextBooking = bookingRepository
-                    .findTopByItemOwnerIdAndStatusAndStartAfterOrderByStartAsc(userId, Status.APPROVED, now)
-                    .map(BookingMapper::toBookingDtoForItem)
-                    .orElse(null);
-
-            itemDtoBooking.setLastBooking(lastBooking);
-            itemDtoBooking.setNextBooking(nextBooking);
+            createItemDtoWithBooking(itemDtoBooking);
         }
+
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
         if (!comments.isEmpty()) {
-            itemDtoBooking.setComments(comments
-                    .stream().map(CommentMapper::toCommentDto)
-                    .collect(Collectors.toList())
-            );
+            itemDtoBooking.setComments(comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList()));
         }
 
         return itemDtoBooking;
@@ -119,38 +107,27 @@ public class ItemServiceImpl implements ItemService {
     //Получение всех вещей пользователя
     @Override
     public List<ItemDtoBooking> getAllItemsByUser(Long userId, Integer from, Integer size) {
-        List<Item> userItemList = itemRepository.findAll().stream()
-                .filter(item -> item.getOwner().getId().equals(userId))
-                .collect(Collectors.toList());
-        return userItemList.stream()
+        int page = from / size;
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<ItemDtoBooking> userItemList = itemRepository.findByOwnerId(userId, pageable)
+                .stream()
                 .map(ItemMapper::toItemDtoWithBooking)
-                .peek(item -> {
-                    List<Booking> bookings = bookingRepository.findBookingByItemIdOrderByStartAsc(item.getId());
-                    LocalDateTime now = LocalDateTime.now();
-                    BookingDtoForItem lastBooking = null;
-                    BookingDtoForItem nextBooking = null;
-
-                    for (Booking booking : bookings) {
-                        if (booking.getEnd().isBefore(now)) {
-                            lastBooking = BookingMapper.toBookingDtoForItem(booking);
-                        } else if (booking.getStart().isAfter(now)) {
-                            nextBooking = BookingMapper.toBookingDtoForItem(booking);
-                            break;
-                        }
-                    }
-                    item.setLastBooking(lastBooking);
-                    item.setNextBooking(nextBooking);
-
-                    List<Comment> comments = commentRepository.findAllByItemId(item.getId());
-
-                    if (!comments.isEmpty()) {
-                        item.setComments(comments
-                                .stream().map(CommentMapper::toCommentDto)
-                                .collect(Collectors.toList()));
-                    }
-
-                })
                 .collect(Collectors.toList());
+
+        for (ItemDtoBooking itemDtoBooking : userItemList) {
+            createItemDtoWithBooking(itemDtoBooking);
+
+            List<Comment> comments = commentRepository.findAllByItemId(itemDtoBooking.getId());
+
+            if (!comments.isEmpty()) {
+                itemDtoBooking.setComments(comments.stream().map(CommentMapper::toCommentDto)
+                        .collect(Collectors.toList()));
+            }
+        }
+
+        userItemList.sort(Comparator.comparing(ItemDtoBooking::getId));
+        return userItemList;
     }
 
     //Поиск вещи
@@ -168,6 +145,26 @@ public class ItemServiceImpl implements ItemService {
         }
 
         return Collections.emptyList();
+    }
+
+    private void createItemDtoWithBooking(ItemDtoBooking itemDtoBooking) {
+        List<Booking> lastBookings = bookingRepository
+                .findBookingsByItemIdAndEndIsBeforeOrderByEndDesc(itemDtoBooking.getId(),
+                        LocalDateTime.now());
+
+        if (!lastBookings.isEmpty()) {
+            BookingDtoForItem lastBooking = BookingMapper.toBookingDtoForItem(lastBookings.get(0));
+            itemDtoBooking.setLastBooking(lastBooking);
+        }
+
+        List<Booking> nextBookings = bookingRepository
+                .findBookingsByItemIdAndStartIsAfterOrderByStartDesc(itemDtoBooking.getId(),
+                        LocalDateTime.now());
+
+        if (!nextBookings.isEmpty()) {
+            BookingDtoForItem nextBooking = BookingMapper.toBookingDtoForItem(nextBookings.get(0));
+            itemDtoBooking.setNextBooking(nextBooking);
+        }
     }
 
     //Добавление комментария
