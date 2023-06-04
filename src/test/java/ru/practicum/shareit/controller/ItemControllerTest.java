@@ -4,18 +4,19 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.practicum.shareit.ShareItTests;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDtoBooking;
 import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -40,7 +41,9 @@ public class ItemControllerTest extends ShareItTests {
         itemDto.setAvailable(true);
         itemController.create(1L, itemDto);
 
-        assertEquals(itemController.getItem(1L, 1L), itemDto, "Вещь не создалась");
+        ItemDtoBooking itemDto1 = itemController.getItem(1L, 1L);
+
+        assertEquals(itemDto1.getId(), itemDto.getId(), "Вещь не создалась");
     }
 
     //Создание с неизвестным пользователем
@@ -58,7 +61,7 @@ public class ItemControllerTest extends ShareItTests {
                 "Текст ошибки валидации разный");
     }
 
-    //Создание вещи c пустым описанием
+    //Создание вещи c пустым именем
     @Test
     public void createValidItemWithEmptyName() {
         UserDto userDto = new UserDto();
@@ -71,14 +74,11 @@ public class ItemControllerTest extends ShareItTests {
         itemDto.setId(1L);
         itemDto.setDescription("Тестовое описание");
         itemDto.setAvailable(true);
-        itemController.create(1L, itemDto);
 
-        String validatorMessage = validator.validate(itemDto).iterator().next().getMessage();
+        Throwable throwable =
+                assertThrows(DataIntegrityViolationException.class, () -> itemController.create(1L, itemDto));
 
-        assertEquals("Имя вещи не может быть пустым", validatorMessage,
-                "Текст ошибки валидации разный");
-
-        assertEquals(itemController.getItem(1L, 1L), itemDto, "Вещь не создалась");
+        assertNotNull(throwable.getMessage());
     }
 
     //Создание вещи c пустым описанием
@@ -94,14 +94,11 @@ public class ItemControllerTest extends ShareItTests {
         itemDto.setId(1L);
         itemDto.setName("Тестовое наименование");
         itemDto.setAvailable(true);
-        itemController.create(1L, itemDto);
 
-        String validatorMessage = validator.validate(itemDto).iterator().next().getMessage();
+        Throwable throwable =
+                assertThrows(DataIntegrityViolationException.class, () -> itemController.create(1L, itemDto));
 
-        assertEquals("Описание вещи не может быть пустым", validatorMessage,
-                "Текст ошибки валидации разный");
-
-        assertEquals(itemController.getItem(1L, 1L), itemDto, "Вещь не создалась");
+        assertNotNull(throwable.getMessage());
     }
 
     //Создание вещи c пустым статусом
@@ -118,14 +115,11 @@ public class ItemControllerTest extends ShareItTests {
         itemDto.setName("Тестовое наименование");
         itemDto.setDescription("Тестовое описание");
         itemDto.setAvailable(null);
-        itemController.create(1L, itemDto);
 
-        String validatorMessage = validator.validate(itemDto).iterator().next().getMessage();
+        Throwable throwable =
+                assertThrows(DataIntegrityViolationException.class, () -> itemController.create(1L, itemDto));
 
-        assertEquals("Статус не может быть null", validatorMessage,
-                "Текст ошибки валидации разный");
-
-        assertEquals(itemController.getItem(1L, 1L), itemDto, "Вещь не создалась");
+        assertNotNull(throwable.getMessage());
     }
 
     //Обновление вещи
@@ -151,7 +145,9 @@ public class ItemControllerTest extends ShareItTests {
         itemDto1.setAvailable(true);
         itemController.update(1L, 1L, itemDto1);
 
-        assertEquals(itemController.getItem(1L, 1L), itemDto1, "Вещь не обновилась");
+        ItemDtoBooking itemDto2 = itemController.getItem(1L, 1L);
+
+        assertEquals(itemDto2.getId(), itemDto1.getId(), "Вещь не обновилась");
     }
 
     //Обновление чужой вещи
@@ -199,9 +195,9 @@ public class ItemControllerTest extends ShareItTests {
         itemDto.setAvailable(true);
         itemController.create(1L, itemDto);
 
-        ItemDto itemDto1 = itemController.getItem(1L, 1L);
+        ItemDtoBooking itemDto1 = itemController.getItem(1L, 1L);
 
-        assertEquals(itemDto1, itemDto, "Вещи не совпадают");
+        assertEquals(itemDto1.getId(), itemDto.getId(), "Вещи не совпадают");
     }
 
     //Получение несуществующей вещи
@@ -236,7 +232,7 @@ public class ItemControllerTest extends ShareItTests {
         itemDto1.setAvailable(true);
         itemController.create(1L, itemDto1);
 
-        List<ItemDto> itemDtoList = itemController.getAllItemsByUser(1L);
+        List<ItemDtoBooking> itemDtoList = itemController.getAllItemsByUser(1L);
 
         assertEquals(itemDtoList.size(), 2, "Количество вещей не совпадает");
     }

@@ -1,18 +1,26 @@
 package ru.practicum.shareit.user.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "users", schema = "public")
 public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
+
     private Long id;
-    @NotBlank(message = "Имя не может быть пустым.")
+
+    @Column(name = "user_name", nullable = false, length = 255)
     private String name;
-    @Email(message = "Не является адресом.")
-    @NotBlank(message = "Почтовый адрес не может быть пустым.")
+
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
+
 }
