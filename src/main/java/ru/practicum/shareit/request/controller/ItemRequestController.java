@@ -32,6 +32,8 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestDtoWithItems> findAll(@RequestHeader("X-Sharer-User-Id") Long userId) {
+        log.info("Получен GET-запрос к эндпоинту: '/requests' на получение запросов пользователя ID={}",
+                userId);
         return itemRequestService.getAll(userId);
     }
 
@@ -39,12 +41,15 @@ public class ItemRequestController {
     public List<ItemRequestDtoWithItems> getAllWithPageable(@RequestHeader("X-Sharer-User-Id") Long userId,
                                                             @RequestParam(defaultValue = "0") @Min(0) Integer from,
                                                             @RequestParam(defaultValue = "20") @Positive Integer size) {
+        log.info("Получен GET-запрос к эндпоинту: '/requests/all' от пользователя с ID={} на получение всех запросов",
+                userId);
         return itemRequestService.getAllWithPageable(userId, from, size);
     }
 
     @GetMapping("/{requestId}")
     public ItemRequestDtoWithItems getItemRequest(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @PathVariable Long requestId) {
+                                                  @Valid @PathVariable Long requestId) {
+        log.info("Получен GET-запрос к эндпоинту: '/requests/requestId' на получение запроса с ID={}", requestId);
         return itemRequestService.getItemRequest(userId, requestId);
     }
 }

@@ -3,7 +3,10 @@ package ru.practicum.shareit.userTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.annotation.DirtiesContext;
@@ -19,14 +22,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Profile("test")
-public class UserServiceTest {
+class UserServiceTest {
+
     private UserService userService;
     private UserRepository userRepository;
     private User user;
@@ -45,10 +50,10 @@ public class UserServiceTest {
 
     //Создание пользователя
     @Test
-    public void createValidUser() {
+    void createValidUser() {
         Long userId = user.getId();
 
-        when(userRepository.save(user)).thenReturn(user);
+        lenient().when(userRepository.save(user)).thenReturn(user);
 
         UserDto userDto = userService.create(UserMapper.toUserDto(user));
 
@@ -61,7 +66,7 @@ public class UserServiceTest {
 
     //Получение пользователя по идентификатору
     @Test
-    public void getUserById() {
+     void getUserById() {
         Long userId = user.getId();
 
         when(userRepository.save(user)).thenReturn(user);
@@ -80,7 +85,7 @@ public class UserServiceTest {
 
     //Получение всех пользователей
     @Test
-    public void getAllUsers() {
+     void getAllUsers() {
         Long userId = user.getId();
 
         when(userRepository.save(user)).thenReturn(user);
@@ -100,14 +105,14 @@ public class UserServiceTest {
 
     //Обновление данных пользователя
     @Test
-    public void updateValidUser() {
+     void updateValidUser() {
         User user1 = createValidUserExample();
 
         Long userId = user.getId();
         user1.setName("test1");
 
         when(userRepository.save(user1)).thenReturn(user1);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
 
         UserDto userDto = userService.update(userId, UserMapper.toUserDto(user1));
 
@@ -121,7 +126,7 @@ public class UserServiceTest {
 
     // Удаление пользователя
     @Test
-    public void deleteUser() {
+     void deleteUser() {
         Long userId = user.getId();
 
         when(userRepository.save(user)).thenReturn(user);
@@ -135,7 +140,7 @@ public class UserServiceTest {
 
     //Получение несуществующего пользователя
     @Test
-    public void getUnknownUser() {
+     void getUnknownUser() {
         Throwable throwable = assertThrows(NotFoundException.class, () -> userService.getUser(user.getId()));
 
         assertEquals("Неверный идентификатор пользователя", throwable.getMessage(),
@@ -144,7 +149,7 @@ public class UserServiceTest {
 
     //Обновление несуществующего пользователя
     @Test
-    public void updateUnknownUser() {
+     void updateUnknownUser() {
         User user1 = createValidUserExample();
         user1.setName("test1");
 

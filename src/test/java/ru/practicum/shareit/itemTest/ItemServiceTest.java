@@ -28,6 +28,7 @@ import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +44,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Profile("test")
-public class ItemServiceTest {
+ class ItemServiceTest {
     private ItemService itemService;
     private ItemRepository itemRepository;
     private ItemRequestRepository itemRequestRepository;
@@ -68,8 +69,9 @@ public class ItemServiceTest {
     private Item createValidItemExample() {
         user = new User(1L, "testUser", "test@yandex.ru");
         User user1 = new User(2L, "testUser1", "test1@yandex.ru");
+        LocalDateTime now = LocalDateTime.now(Clock.systemDefaultZone());
 
-        ItemRequest itemRequest = new ItemRequest(1L, "testItemRequest", user1, LocalDateTime.now());
+        ItemRequest itemRequest = new ItemRequest(1L, "testItemRequest", user1, now);
         return new Item(1L, "testItem", "itemDescription", true, user, itemRequest);
     }
 
@@ -84,13 +86,14 @@ public class ItemServiceTest {
 
     //Создание вещи
     @Test
-    public void createValidItem() {
-        Long itemId = item.getId();
-        Long userId = item.getOwner().getId();
+     void createValidItem() {
+       Long itemId = item.getId();
+       Long userId = item.getOwner().getId();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(item.getOwner()));
-        when(itemRequestRepository.findById(item.getItemRequest().getId()))
-                .thenReturn(Optional.of(item.getItemRequest()));
+
+        when(itemRequestRepository.findById(item.getItemRequest().getId())).thenReturn(Optional.of(item.getItemRequest()));
+
         when(itemRepository.save(item)).thenReturn(item);
 
         ItemDto itemDto = itemService.create(userId, ItemMapper.toItemDto(item));
@@ -105,7 +108,7 @@ public class ItemServiceTest {
 
     //Обновление вещи
     @Test
-    public void updateItem() {
+     void updateItem() {
         Item item1 = createValidItemExample();
         Long itemId = item.getId();
 
@@ -126,7 +129,7 @@ public class ItemServiceTest {
 
     //Получение вещи
     @Test
-    public void getItemById() {
+     void getItemById() {
         Long itemId = item.getId();
         Long userId = item.getOwner().getId();
 
@@ -149,7 +152,7 @@ public class ItemServiceTest {
 
     //Получение всех вещей пользователя
     @Test
-    public void getAllItemsByUserId() {
+     void getAllItemsByUserId() {
         Long itemId = item.getId();
         Long userId = item.getOwner().getId();
 
@@ -173,7 +176,7 @@ public class ItemServiceTest {
 
     //Поиск вещи
     @Test
-    public void search() {
+     void search() {
         Long itemId = item.getId();
         Long userId = item.getOwner().getId();
 
@@ -202,7 +205,7 @@ public class ItemServiceTest {
 
     //Поиск вещи (пустой)
     @Test
-    public void searchEmpty() {
+     void searchEmpty() {
         String text = " ";
 
         final List<ItemDto> itemDtoList = itemService.search(text, 0, 20);
@@ -212,7 +215,7 @@ public class ItemServiceTest {
 
     //Создание комментария к вещи
     @Test
-    public void createCommentForItem() {
+     void createCommentForItem() {
         User userWriteComment = item.getItemRequest().getRequestor();
 
         Comment comment = createValidCommentExample(item, userWriteComment);
@@ -241,7 +244,7 @@ public class ItemServiceTest {
 
     //Создание вещи с несуществующем пользователем
     @Test
-    public void createItemUnknownUser() {
+     void createItemUnknownUser() {
         Throwable throwable = assertThrows(NotFoundException.class, () ->
                 itemService.create(3L, ItemMapper.toItemDto(item)));
 
@@ -251,7 +254,7 @@ public class ItemServiceTest {
 
     //Получение несуществующей вещи
     @Test
-    public void getUnknownItem() {
+     void getUnknownItem() {
         Long userId = item.getOwner().getId();
 
         Throwable throwable = assertThrows(NotFoundException.class, () -> itemService.getItem(2L, userId));
@@ -262,7 +265,7 @@ public class ItemServiceTest {
 
     //Обновление несуществующей вещи
     @Test
-    public void updateUnknownItem() {
+     void updateUnknownItem() {
         Item item1 = createValidItemExample();
         item1.setName("testItem1");
 
@@ -275,7 +278,7 @@ public class ItemServiceTest {
 
     //Обновление чужой вещи
     @Test
-    public void updateItemNoOwner() {
+     void updateItemNoOwner() {
         Item item1 = createValidItemExample();
         item1.setName("testItem1");
 
@@ -290,7 +293,7 @@ public class ItemServiceTest {
 
     //Обновление несуществующей вещи
     @Test
-    public void updateItemNullParam() {
+     void updateItemNullParam() {
         Long itemId = item.getId();
         Item item1 = createValidItemExample();
         item1.setName("testItem1");
@@ -313,7 +316,7 @@ public class ItemServiceTest {
 
     //Создание комментария за несуществующего пользователя
     @Test
-    public void createCommentUnknownUser() {
+     void createCommentUnknownUser() {
         User userWriteComment = item.getItemRequest().getRequestor();
 
         Comment comment = createValidCommentExample(item, userWriteComment);
@@ -331,7 +334,7 @@ public class ItemServiceTest {
 
     //Создание комментария к несуществующей вещи
     @Test
-    public void createCommentUnknownItem() {
+     void createCommentUnknownItem() {
         User userWriteComment = item.getItemRequest().getRequestor();
 
         Comment comment = createValidCommentExample(item, userWriteComment);

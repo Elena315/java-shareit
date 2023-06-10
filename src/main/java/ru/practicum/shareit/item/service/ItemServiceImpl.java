@@ -25,6 +25,7 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,12 +119,11 @@ public class ItemServiceImpl implements ItemService {
     //Получение всех вещей пользователя
     @Override
     public List<ItemDtoBooking> getAllItemsByUser(Long userId, Integer from, Integer size) {
+       //преобразование параметров
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
 
-        List<Item> userItemList = itemRepository.findByOwnerId(userId, pageable).stream()
-                .filter(item -> item.getOwner().getId().equals(userId))
-                .collect(Collectors.toList());
+        List<Item> userItemList = new ArrayList<>(itemRepository.findByOwnerId(userId, pageable));
         return userItemList.stream()
                 .map(ItemMapper::toItemDtoWithBooking)
                 .peek(item -> {
@@ -158,6 +158,7 @@ public class ItemServiceImpl implements ItemService {
     //Поиск вещи
     @Override
     public List<ItemDto> search(String text, Integer from, Integer size) {
+        //преобразование параметров
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
 
@@ -171,26 +172,6 @@ public class ItemServiceImpl implements ItemService {
 
         return Collections.emptyList();
     }
-
-  /*  private void createItemDtoWithBooking(ItemDtoBooking itemDtoBooking) {
-        List<Booking> lastBookings = bookingRepository
-                .findBookingsByItemIdAndEndIsBeforeOrderByEndDesc(itemDtoBooking.getId(),
-                        LocalDateTime.now());
-
-        if (!lastBookings.isEmpty()) {
-            BookingDtoForItem lastBooking = BookingMapper.toBookingDtoForItem(lastBookings.get(0));
-            itemDtoBooking.setLastBooking(lastBooking);
-        }
-
-        List<Booking> nextBookings = bookingRepository
-                .findBookingsByItemIdAndStartIsAfterOrderByStartDesc(itemDtoBooking.getId(),
-                        LocalDateTime.now());
-
-        if (!nextBookings.isEmpty()) {
-            BookingDtoForItem nextBooking = BookingMapper.toBookingDtoForItem(nextBookings.get(0));
-            itemDtoBooking.setNextBooking(nextBooking);
-        }
-    }*/
 
     //Добавление комментария
     @Override

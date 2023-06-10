@@ -1,6 +1,7 @@
 package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemRequestServiceImpl implements ItemRequestService {
@@ -39,7 +41,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
                 .orElseThrow(() -> new NotFoundException("Неверный идентификатор пользователя"));
 
         itemRequest.setRequestor(user);
-
+        log.info("Создан запрос id={}", itemRequest.getId());
         return itemRequestMapper.toItemRequestDto(itemRequestRepository.save(itemRequest));
     }
 
@@ -51,8 +53,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         List<ItemRequestDtoWithItems> itemRequestDtoWithItemsList = new ArrayList<>();
 
         itemRequestRepository.findAllByRequestorIdOrderByCreatedDesc(userId)
-                .forEach(itemRequest -> itemRequestDtoWithItemsList.add(findAllByItemRequestId(itemRequest)));
-
+                .forEach(itemRequest -> itemRequestDtoWithItemsList.add(convertToItemRequestDtoWithItems(itemRequest)));
+        log.info("Получен список всех запросов от пользователей");
         return itemRequestDtoWithItemsList;
     }
 
@@ -63,8 +65,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId).orElseThrow(() ->
                 new NotFoundException("Попробуйте другой идентификатор"));
-
-        return findAllByItemRequestId(itemRequest);
+        log.info("Получен запрос id={}", itemRequestId);
+        return convertToItemRequestDtoWithItems(itemRequest);
     }
 
     //Получение запросов со страницами
@@ -82,12 +84,12 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         List<ItemRequestDtoWithItems> itemRequestDtoWithItemsList = new ArrayList<>();
 
-        requestList.forEach(itemRequest -> itemRequestDtoWithItemsList.add(findAllByItemRequestId(itemRequest)));
-
+        requestList.forEach(itemRequest -> itemRequestDtoWithItemsList.add(convertToItemRequestDtoWithItems(itemRequest)));
+        log.info("Получен список всех запросов от пользователей, кроме id={}", userId);
         return itemRequestDtoWithItemsList;
     }
 
-    private ItemRequestDtoWithItems findAllByItemRequestId(ItemRequest itemRequest) {
+    private ItemRequestDtoWithItems convertToItemRequestDtoWithItems(ItemRequest itemRequest) {
         ItemRequestDtoWithItems dtoWithItems = itemRequestMapper.toItemRequestDtoWithItems(itemRequest);
 
         List<ItemDto> items = itemRepository.findAllByItemRequestId(dtoWithItems.getId())

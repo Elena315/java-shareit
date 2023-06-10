@@ -36,7 +36,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDtoBooking getItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Получена вещь с id = {}", itemId);
+        log.info("Получен GET-запрос к эндпоинту: '/items/itemId' для вещи с id = {}", itemId);
         return itemService.getItem(itemId, userId);
     }
 
@@ -44,6 +44,7 @@ public class ItemController {
     public List<ItemDtoBooking> getAllItemsByUser(@RequestHeader("X-Sharer-User-Id") long userId,
                                                   @RequestParam(defaultValue = "0") @Min(0) int from,
                                                   @RequestParam(defaultValue = "20") @Positive int size) {
+        log.info("Получен GET-запрос к эндпоинту: '/items' на получение всех вещей владельца с ID={}", userId);
         return itemService.getAllItemsByUser(userId, from, size);
     }
 
@@ -51,7 +52,7 @@ public class ItemController {
     public List<ItemDto> search(@RequestParam String text,
                                 @RequestParam(defaultValue = "0") @Min(0) int from,
                                 @RequestParam(defaultValue = "20") @Positive int size) {
-        log.info("Получение всех вещей пользователя с id = {}", text);
+        log.info("Получен GET-запрос к эндпоинту: '/items/search' на поиск вещи с текстом={}", text);
         return itemService.search(text, from, size);
     }
 
@@ -60,6 +61,8 @@ public class ItemController {
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
                                     @Valid @RequestBody CommentDto commentDto,
                                     @PathVariable long itemId) {
+        log.info("Получен POST-запрос к эндпоинту: '/items/comment' на" +
+                " добавление отзыва пользователем с ID={}", userId);
         return itemService.createComment(userId, itemId, commentDto);
     }
 }

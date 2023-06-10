@@ -31,6 +31,7 @@ public class BookingServiceWithoutMockTest {
     private final BookingService bookingService;
     private final UserService userService;
     private final ItemService itemService;
+
     private final User owner = new User(1L, "testOwner", "testOwner@yandex.ru");
     private final User booker = new User(2L, "testBooker", "testBooker@yandex.ru");
     private final Item item = new Item(1L, "testItem", "testDescription", true, owner,
