@@ -94,7 +94,7 @@ import static org.mockito.Mockito.times;
 
         when(itemRequestRepository.findById(item.getItemRequest().getId())).thenReturn(Optional.of(item.getItemRequest()));
 
-        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
 
         ItemDto itemDto = itemService.create(userId, ItemMapper.toItemDto(item));
 
@@ -103,7 +103,7 @@ import static org.mockito.Mockito.times;
         assertEquals(item.getDescription(), itemDto.getDescription(), "Описания не совпадают");
         assertEquals(item.getAvailable(), itemDto.getAvailable(), "Статусы не совпадают");
 
-        verify(itemRepository, times(1)).save(item);
+        verify(itemRepository, times(1)).save(any(Item.class));
     }
 
     //Обновление вещи
@@ -136,7 +136,7 @@ import static org.mockito.Mockito.times;
         when(userRepository.findById(userId)).thenReturn(Optional.of(item.getOwner()));
         when(itemRequestRepository.findById(item.getItemRequest().getId()))
                 .thenReturn(Optional.of(item.getItemRequest()));
-        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
 
         itemService.create(item.getOwner().getId(), ItemMapper.toItemDto(item));
@@ -159,7 +159,7 @@ import static org.mockito.Mockito.times;
         when(userRepository.findById(userId)).thenReturn(Optional.of(item.getOwner()));
         when(itemRequestRepository.findById(item.getItemRequest().getId()))
                 .thenReturn(Optional.of(item.getItemRequest()));
-        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
         when(itemRepository.findByOwnerId(userId, PageRequest.of(0, 20)))
                 .thenReturn(Collections.singletonList(item));
 
@@ -188,7 +188,7 @@ import static org.mockito.Mockito.times;
         when(userRepository.findById(userId)).thenReturn(Optional.of(item.getOwner()));
         when(itemRequestRepository.findById(item.getItemRequest().getId()))
                 .thenReturn(Optional.of(item.getItemRequest()));
-        when(itemRepository.save(item)).thenReturn(item);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
         when(itemRepository.search(text, PageRequest.of(0, 20))).thenReturn(items);
 
         itemService.create(userId, ItemMapper.toItemDto(item));

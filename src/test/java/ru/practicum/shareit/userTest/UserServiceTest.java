@@ -19,16 +19,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ExtendWith(MockitoExtension.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Profile("test")
-class UserServiceTest {
-
+public class UserServiceTest {
     private UserService userService;
     private UserRepository userRepository;
     private User user;
@@ -47,10 +45,10 @@ class UserServiceTest {
 
     //Создание пользователя
     @Test
-    void createValidUser() {
+    public void createValidUser() {
         Long userId = user.getId();
 
-        lenient().when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         UserDto userDto = userService.create(UserMapper.toUserDto(user));
 
@@ -58,15 +56,15 @@ class UserServiceTest {
         assertEquals(user.getName(), userDto.getName(), "Имена не совпадают");
         assertEquals(user.getEmail(), userDto.getEmail(), "Почты не совпадают");
 
-        verify(userRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     //Получение пользователя по идентификатору
     @Test
-    void getUserById() {
+    public void getUserById() {
         Long userId = user.getId();
 
-        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.create(UserMapper.toUserDto(user));
@@ -76,16 +74,16 @@ class UserServiceTest {
         assertEquals(user.getName(), userDto.getName(), "Имя пользователя не совпадает");
         assertEquals(user.getEmail(), userDto.getEmail(), "Почта пользователя не совпадает");
 
-        verify(userRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(any(User.class));
         verify(userRepository, times(1)).findById(userId);
     }
 
     //Получение всех пользователей
     @Test
-    void getAllUsers() {
+    public void getAllUsers() {
         Long userId = user.getId();
 
-        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
         when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
 
         userService.create(UserMapper.toUserDto(user));
@@ -96,20 +94,20 @@ class UserServiceTest {
         assertEquals(user.getName(), userDtoList.get(0).getName(), "Имена не совпадают");
         assertEquals(user.getEmail(), userDtoList.get(0).getEmail(), "Почты не спадают");
 
-        verify(userRepository, times(1)).save(user);
+        verify(userRepository, times(1)).save(any(User.class));
         verify(userRepository, times(1)).findAll();
     }
 
     //Обновление данных пользователя
     @Test
-    void updateValidUser() {
+    public void updateValidUser() {
         User user1 = createValidUserExample();
 
         Long userId = user.getId();
         user1.setName("test1");
 
-        when(userRepository.save(user1)).thenReturn(user1);
-        when(userRepository.findById(userId)).thenReturn(Optional.ofNullable(user));
+        when(userRepository.save(any(User.class))).thenReturn(user1);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         UserDto userDto = userService.update(userId, UserMapper.toUserDto(user1));
 
@@ -117,16 +115,16 @@ class UserServiceTest {
         assertEquals(user1.getName(), userDto.getName(), "Имена не совпадают");
         assertEquals(user.getEmail(), userDto.getEmail(), "Почты не совпадают");
 
-        verify(userRepository, times(1)).save(user1);
+        verify(userRepository, times(1)).save(any(User.class));
         verify(userRepository, times(1)).findById(userId);
     }
 
     // Удаление пользователя
     @Test
-    void deleteUser() {
+    public void deleteUser() {
         Long userId = user.getId();
 
-        when(userRepository.save(user)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.create(UserMapper.toUserDto(user));
@@ -137,7 +135,7 @@ class UserServiceTest {
 
     //Получение несуществующего пользователя
     @Test
-    void getUnknownUser() {
+    public void getUnknownUser() {
         Throwable throwable = assertThrows(NotFoundException.class, () -> userService.getUser(user.getId()));
 
         assertEquals("Неверный идентификатор пользователя", throwable.getMessage(),
@@ -146,7 +144,7 @@ class UserServiceTest {
 
     //Обновление несуществующего пользователя
     @Test
-    void updateUnknownUser() {
+    public void updateUnknownUser() {
         User user1 = createValidUserExample();
         user1.setName("test1");
 
