@@ -14,18 +14,12 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookingDto {
-
     private Long id;
-
     @NotNull(message = "Время начала бронирования не может быть пустым")
     private LocalDateTime start;
-
     @NotNull(message = "Время конца бронирования не может быть пустым")
     private LocalDateTime end;
-
     private Item item;
-
     private User booker;
-
     private Status status;
 }
