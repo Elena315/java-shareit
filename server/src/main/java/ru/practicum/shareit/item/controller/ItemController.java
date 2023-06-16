@@ -33,7 +33,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDtoBooking getItem(@PathVariable long itemId, @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Получена вещь с id = {}", itemId);
+        log.info("Получен GET-запрос к эндпоинту: '/items/itemId' для вещи с id = {}", itemId);
         return itemService.getItem(itemId, userId);
     }
 
@@ -52,11 +52,12 @@ public class ItemController {
         return itemService.search(text, from, size);
     }
 
-
     @PostMapping("/{itemId}/comment")
     public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
                                     @RequestBody CommentDto commentDto,
                                     @PathVariable long itemId) {
+        log.info("Получен POST-запрос к эндпоинту: '/items/comment' на" +
+                " добавление отзыва пользователем с ID={}", userId);
         return itemService.createComment(userId, itemId, commentDto);
     }
 }

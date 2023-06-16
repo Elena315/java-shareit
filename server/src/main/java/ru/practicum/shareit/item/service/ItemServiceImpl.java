@@ -26,6 +26,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -70,6 +71,7 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Нельзя изменить чужую вещь");
         }
+
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -79,6 +81,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
+
         itemRepository.save(item);
         return ItemMapper.toItemDto(item);
     }
@@ -107,32 +110,46 @@ public class ItemServiceImpl implements ItemService {
     //Получение всех вещей пользователя
     @Override
     public List<ItemDtoBooking> getAllItemsByUser(Long userId, Integer from, Integer size) {
+        //преобразование параметров
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
 
-        List<ItemDtoBooking> userItemList = itemRepository.findByOwnerId(userId, pageable)
-                .stream()
+        List<Item> userItemList = new ArrayList<>(itemRepository.findByOwnerId(userId, pageable));
+        return userItemList.stream()
                 .map(ItemMapper::toItemDtoWithBooking)
+                .peek(item -> {
+                    List<Booking> bookings = bookingRepository.findBookingByItemIdOrderByStartAsc(item.getId());
+                    LocalDateTime now = LocalDateTime.now();
+                    BookingDtoForItem lastBooking = null;
+                    BookingDtoForItem nextBooking = null;
+
+                    for (Booking booking : bookings) {
+                        if (booking.getEnd().isBefore(now)) {
+                            lastBooking = BookingMapper.toBookingDtoForItem(booking);
+                        } else if (booking.getStart().isAfter(now)) {
+                            nextBooking = BookingMapper.toBookingDtoForItem(booking);
+                            break;
+                        }
+                    }
+                    item.setLastBooking(lastBooking);
+                    item.setNextBooking(nextBooking);
+
+                    List<Comment> comments = commentRepository.findAllByItemId(item.getId());
+
+                    if (!comments.isEmpty()) {
+                        item.setComments(comments
+                                .stream().map(CommentMapper::toCommentDto)
+                                .collect(Collectors.toList()));
+                    }
+
+                })
                 .collect(Collectors.toList());
-
-        for (ItemDtoBooking itemDtoBooking : userItemList) {
-            createItemDtoWithBooking(itemDtoBooking);
-
-            List<Comment> comments = commentRepository.findAllByItemId(itemDtoBooking.getId());
-
-            if (!comments.isEmpty()) {
-                itemDtoBooking.setComments(comments.stream().map(CommentMapper::toCommentDto)
-                        .collect(Collectors.toList()));
-            }
-        }
-
-        userItemList.sort(Comparator.comparing(ItemDtoBooking::getId));
-        return userItemList;
     }
 
     //Поиск вещи
     @Override
-    public List<ItemDto> search(String text, Integer from, Integer size) {
+     public List<ItemDto> search(String text, Integer from, Integer size) {
+        //преобразование параметров
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
 
@@ -143,7 +160,6 @@ public class ItemServiceImpl implements ItemService {
                     .map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         }
-
         return Collections.emptyList();
     }
 
