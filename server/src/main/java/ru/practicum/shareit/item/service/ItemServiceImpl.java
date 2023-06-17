@@ -50,7 +50,6 @@ public class ItemServiceImpl implements ItemService {
         item.setOwner(user);
 
         Long requestId = itemDto.getRequestId();
-
         if (requestId != null) {
             item.setItemRequest(itemRequestRepository.findById(requestId)
                     .orElseThrow(() -> new NotFoundException("Неверный идентификатор запроса")));
@@ -69,7 +68,6 @@ public class ItemServiceImpl implements ItemService {
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Нельзя изменить чужую вещь");
         }
-
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -79,7 +77,6 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-
         itemRepository.save(item);
         return ItemMapper.toItemDto(item);
     }
@@ -115,7 +112,6 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList())
             );
         }
-
         return itemDtoBooking;
     }
 
@@ -158,10 +154,9 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-
     //Поиск вещи
     @Override
-     public List<ItemDto> search(String text, Integer from, Integer size) {
+    public List<ItemDto> search(String text, Integer from, Integer size) {
         //преобразование параметров
         int page = from / size;
         Pageable pageable = PageRequest.of(page, size);
