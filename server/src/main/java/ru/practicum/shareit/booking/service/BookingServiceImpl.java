@@ -37,6 +37,12 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDtoSimple.getEnd().equals(bookingDtoSimple.getStart())) {
             throw new ValidationException("Время окончания не может быть равно времени начала");
         }
+        if (bookingDtoSimple.getStart().isBefore(LocalDateTime.now())) {
+            throw new ValidationException("Время начала не может быть в прошлом");
+        }
+        if (bookingDtoSimple.getEnd()==null) {
+            throw new ValidationException("Время окончания не может быть равно нулю");
+        }
         Booking booking = BookingMapper.fromSimpleToBooking(bookingDtoSimple);
 
         booking.setBooker(userRepository.findById(userId).orElseThrow());
@@ -44,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
         Item item = itemRepository.findById(bookingDtoSimple.getItemId())
                 .orElseThrow(() -> new NotFoundException("Неверный идентификатор вещи"));
 
-        if (!item.getAvailable()) {
+        if (Boolean.FALSE.equals(item.getAvailable())) {
             throw new AvailableException("Эта вещь недоступна для аренды");
         }
         if (item.getOwner().getId() == userId) {
