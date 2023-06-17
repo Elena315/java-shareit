@@ -31,6 +31,12 @@ public class BookingServiceImpl implements BookingService {
     //Создание брони
     @Override
     public BookingDto create(BookingDtoSimple bookingDtoSimple, long userId) {
+        if (bookingDtoSimple.getEnd().isBefore(bookingDtoSimple.getStart())) {
+            throw new ValidationException("Время окончания не может быть больше времени начала");
+        }
+        if (bookingDtoSimple.getEnd().equals(bookingDtoSimple.getStart())) {
+            throw new ValidationException("Время окончания не может быть равно времени начала");
+        }
         Booking booking = BookingMapper.fromSimpleToBooking(bookingDtoSimple);
 
         booking.setBooker(userRepository.findById(userId).orElseThrow());
