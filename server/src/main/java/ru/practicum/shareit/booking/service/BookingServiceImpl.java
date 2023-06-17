@@ -11,7 +11,9 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.*;
+import ru.practicum.shareit.exception.AvailableException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -37,7 +39,6 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDtoSimple.getEnd().equals(bookingDtoSimple.getStart())) {
             throw new ValidationException("Время окончания не может быть равно времени начала");
         }
-
         Booking booking = BookingMapper.fromSimpleToBooking(bookingDtoSimple);
 
         booking.setBooker(userRepository.findById(userId).orElseThrow());
@@ -51,7 +52,6 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().getId() == userId) {
             throw new NotFoundException("Владелец вещи не может забронировать свою вещь");
         }
-
         booking.setItem(item);
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }

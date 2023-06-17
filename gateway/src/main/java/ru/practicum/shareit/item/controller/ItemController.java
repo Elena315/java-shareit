@@ -13,6 +13,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 
 @Controller
 @Validated
@@ -45,8 +46,8 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<Object> getAllItemsByUser(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                    @RequestParam(defaultValue = "0") @Min(0) int from,
-                                                    @RequestParam(defaultValue = "20") @Positive int size) {
+                                                    @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                    @Positive @RequestParam(defaultValue = "10") int size) {
         return itemClient.getAllItemsByUser(userId, from, size);
     }
 

@@ -27,6 +27,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -123,6 +124,7 @@ public class ItemServiceImpl implements ItemService {
         Pageable pageable = PageRequest.of(page, size);
 
         List<Item> userItemList = new ArrayList<>(itemRepository.findByOwnerId(userId, pageable));
+
         return userItemList.stream()
                 .map(ItemMapper::toItemDtoWithBooking)
                 .peek(item -> {
@@ -151,6 +153,7 @@ public class ItemServiceImpl implements ItemService {
                     }
 
                 })
+                .sorted(Comparator.comparing(ItemDtoBooking::getId))
                 .collect(Collectors.toList());
     }
 
