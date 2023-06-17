@@ -23,12 +23,12 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long userId,
-                                         @Valid @RequestBody BookingItemRequestDto bookingItemRequestDto) {
+    public ResponseEntity<Object> create(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @Valid @RequestBody BookingItemRequestDto bookingItemRequestDto) {
         if (bookingItemRequestDto.getEnd().isBefore(bookingItemRequestDto.getStart())) {
             throw new ValidationException("Время окончания не может быть больше времени начала");
         }
-
         log.info("Получен запрос к эндпоинту: '{} {}', Бронирование: ItemId: {}", "POST", "/bookings",
                 bookingItemRequestDto.getItemId());
         return bookingClient.create(userId, bookingItemRequestDto);
