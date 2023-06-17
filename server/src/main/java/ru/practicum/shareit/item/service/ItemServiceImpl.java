@@ -93,13 +93,27 @@ public class ItemServiceImpl implements ItemService {
         ItemDtoBooking itemDtoBooking = ItemMapper.toItemDtoWithBooking(item);
 
         if (item.getOwner().getId().equals(userId)) {
-            createItemDtoWithBooking(itemDtoBooking);
-        }
+            LocalDateTime now = LocalDateTime.now();
+            BookingDtoForItem lastBooking = bookingRepository
+                    .findTopByItemOwnerIdAndStatusAndStartBeforeOrderByEndDesc(userId, Status.APPROVED, now)
+                    .map(BookingMapper::toBookingDtoForItem)
+                    .orElse(null);
 
+            BookingDtoForItem nextBooking = bookingRepository
+                    .findTopByItemOwnerIdAndStatusAndStartAfterOrderByStartAsc(userId, Status.APPROVED, now)
+                    .map(BookingMapper::toBookingDtoForItem)
+                    .orElse(null);
+
+            itemDtoBooking.setLastBooking(lastBooking);
+            itemDtoBooking.setNextBooking(nextBooking);
+        }
         List<Comment> comments = commentRepository.findAllByItemId(itemId);
 
         if (!comments.isEmpty()) {
-            itemDtoBooking.setComments(comments.stream().map(CommentMapper::toCommentDto).collect(Collectors.toList()));
+            itemDtoBooking.setComments(comments
+                    .stream().map(CommentMapper::toCommentDto)
+                    .collect(Collectors.toList())
+            );
         }
 
         return itemDtoBooking;
@@ -144,6 +158,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+
     //Поиск вещи
     @Override
      public List<ItemDto> search(String text, Integer from, Integer size) {
@@ -159,26 +174,6 @@ public class ItemServiceImpl implements ItemService {
                     .collect(Collectors.toList());
         }
         return Collections.emptyList();
-    }
-
-    private void createItemDtoWithBooking(ItemDtoBooking itemDtoBooking) {
-        List<Booking> lastBookings = bookingRepository
-                .findBookingsByItemIdAndEndIsBeforeOrderByEndDesc(itemDtoBooking.getId(),
-                        LocalDateTime.now());
-
-        if (!lastBookings.isEmpty()) {
-            BookingDtoForItem lastBooking = BookingMapper.toBookingDtoForItem(lastBookings.get(0));
-            itemDtoBooking.setLastBooking(lastBooking);
-        }
-
-        List<Booking> nextBookings = bookingRepository
-                .findBookingsByItemIdAndStartIsAfterOrderByStartDesc(itemDtoBooking.getId(),
-                        LocalDateTime.now());
-
-        if (!nextBookings.isEmpty()) {
-            BookingDtoForItem nextBooking = BookingMapper.toBookingDtoForItem(nextBookings.get(0));
-            itemDtoBooking.setNextBooking(nextBooking);
-        }
     }
 
     //Добавление комментария

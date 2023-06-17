@@ -141,7 +141,6 @@ public class BookingServiceImpl implements BookingService {
         return bookingList.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 
-
     //Подтверждение брони
     @Override
     public BookingDto approve(long userId, long bookingId, Boolean approved) {
