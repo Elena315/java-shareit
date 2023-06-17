@@ -40,9 +40,7 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDtoSimple.getStart().isBefore(LocalDateTime.now())) {
             throw new ValidationException("Время начала не может быть в прошлом");
         }
-        if (bookingDtoSimple.getEnd()==null) {
-            throw new ValidationException("Время окончания не может быть равно нулю");
-        }
+        if (bookingDtoSimple.getEnd()==null) throw new ValidationException("Время окончания не может быть равно нулю");
         Booking booking = BookingMapper.fromSimpleToBooking(bookingDtoSimple);
 
         booking.setBooker(userRepository.findById(userId).orElseThrow());
