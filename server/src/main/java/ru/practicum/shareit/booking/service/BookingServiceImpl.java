@@ -37,12 +37,6 @@ public class BookingServiceImpl implements BookingService {
         if (bookingDtoSimple.getEnd().equals(bookingDtoSimple.getStart())) {
             throw new ValidationException("Время окончания не может быть равно времени начала");
         }
-        if (bookingDtoSimple.getStart().isBefore(LocalDateTime.now())) {
-            throw new ValidationException("Время начала не может быть в прошлом");
-        }
-        if (bookingDtoSimple.getEnd() == null) {
-            throw new ValidationException("Время окончания не может быть равно нулю");
-        }
 
         Booking booking = BookingMapper.fromSimpleToBooking(bookingDtoSimple);
 
