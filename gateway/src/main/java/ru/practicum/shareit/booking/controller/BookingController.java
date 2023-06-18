@@ -64,7 +64,7 @@ public class BookingController {
     public ResponseEntity<Object> getBookingsByState(@RequestHeader("X-Sharer-User-Id") long userId,
                                                      @RequestParam(name = "state", defaultValue = "all") String stateParam,
                                                      @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                     @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                     @Positive @RequestParam(name = "size", defaultValue = "20") Integer size) {
         Status state = Status.from(stateParam)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
 
