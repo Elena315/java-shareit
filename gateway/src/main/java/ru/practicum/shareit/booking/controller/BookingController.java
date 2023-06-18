@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.client.BookingClient;
 import ru.practicum.shareit.booking.dto.BookingItemRequestDto;
-import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.exception.ValidationException;
 
 import javax.validation.Valid;
