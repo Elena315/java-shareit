@@ -8,6 +8,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.booking.dto.BookingItemRequestDto;
+import ru.practicum.shareit.booking.enums.Status;
 import ru.practicum.shareit.client.BaseClient;
 
 import java.util.Map;
@@ -49,5 +50,13 @@ public class BookingClient extends BaseClient {
         Map<String, Object> parameters = Map.of("approved", approved);
 
         return patch("/" + bookingId + "?approved={approved}", userId, parameters);
+    }
+
+    public ResponseEntity<Object> getBookingsByState(long userId, Status state, Integer from, Integer size) {
+        Map<String, Object> parameters = Map.of(
+                "state", state.name(),
+                "from", from,
+                "size", size);
+        return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 }
